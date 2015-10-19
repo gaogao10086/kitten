@@ -1,0 +1,58 @@
+div#adminMenuTree.ztree li a.level0 {
+    width: 185px;
+    height: 25px;
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    margin: 2px;
+    padding-top: 6px;
+    padding-left: 9px;
+    /* IE6-7 */
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding-box;
+    background-clip: padding-box;
+}
+
+div#adminMenuTree.ztree li a.level0 span {
+    color: #0088CC;
+    font-size: 13px;
+    word-spacing: 2px;
+}
+
+div#adminMenuTree.ztree li {
+    margin-top: 5px;
+    margin-bottom: 5px;
+    margin-left: -6px;
+}
+
+div#adminMenuTree.ztree li a.level1 span {
+    font-size: 12px;
+    color: #0088CC;
+}
+
+div#adminMenuTree.ztree li a.level2 span {
+    font-size: 12px;
+    color: #0088CC;
+}
+
+div#adminMenuTree.ztree li span.button.switch.level0 {
+    display: none;
+}
+
+div #mainPanel {
+    border: 1px solid rgba(0, 0, 0, 0.3);
+    /* IE6-7 */
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    -webkit-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -moz-box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    box-shadow: 0 3px 7px rgba(0, 0, 0, 0.3);
+    -webkit-background-clip: padding-box;
+    -moz-background-clip: padding-box;
+    background-clip: padding-box;
+}

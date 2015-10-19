@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app version="3.0" xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd">
+    <!-- - Key of the system property that should specify the root directory of this - web app. Applied by WebAppRootListener or Log4jConfigListener.! -->
+    <context-param>
+        <param-name>webAppRootKey</param-name>
+        <param-value>kitten.root</param-value>
+    </context-param>
+    <!-- Location of the Log4J config file, for initialization and refresh checks. Applied by Log4jConfigListener. -->
+    <context-param>
+        <param-name>log4jConfigLocation</param-name>
+        <param-value>classpath:log4j.properties</param-value>
+    </context-param>
+    <!-- Location of the XML file that defines the root application context. Applied by ContextLoaderServlet. -->
+    <context-param>
+        <param-name>contextConfigLocation</param-name>
+        <param-value>classpath:applicationContext.xml,classpath:dbContext.xml</param-value>
+    </context-param>
+
+    <!--Loads the log4j -->
+    <listener>
+        <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+    </listener>
+    <!-- Loads the root application context of this web app at startup, by default from "/WEB-INF/applicationContext.xml". Use 
+    WebApplicationContextUtils.getRequiredWebApplicationContext(servletContext); to access it anywhere in the web application, 
+    outside of the framework. The root context is the parent of all servlet-specific contexts. This means that its beans are 
+    automatically available in these child contexts, both for getBean(name) calls and (external) bean references. -->
+    <listener>
+        <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
+    </listener>
+    <!--allow http scope:request,session,globalSession,Singleton,Prototype-->
+    <listener>
+        <listener-class>org.springframework.web.context.request.RequestContextListener</listener-class>
+    </listener>
+
+    <!-- Spring web MVC servlet that dispatches requests to registered handlers. Has its own application context, by default 
+    defined in "{servlet-name}-servlet.xml", i.e. "rest-servlet.xml" in this case. A web app can contain any number of such servlets. 
+    Note that this web app has a shared root application context, serving as parent of all DispatcherServlet contexts. -->
+    <servlet>
+        <servlet-name>platform</servlet-name>
+        <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
+        <init-param>
+            <param-name>contextConfigLocation</param-name>
+            <param-value>classpath*:servlet-*.xml</param-value>
+        </init-param>
+        <load-on-startup>1</load-on-startup>
+    </servlet>
+    <servlet-mapping>
+        <servlet-name>platform</servlet-name>
+        <url-pattern>/platform/*</url-pattern>
+    </servlet-mapping>
+
+    <filter>
+        <filter-name>authFilter</filter-name>
+        <filter-class>com.gys.kitten.core.permission.filter.AuthFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>authFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <!--filter to set the encoding, the encoding should be consistent in all layers of the application-->
+    <filter>
+        <filter-name>CharacterEncoding</filter-name>
+        <filter-class>org.springframework.web.filter.CharacterEncodingFilter</filter-class>
+        <init-param>
+            <param-name>encoding</param-name>
+            <param-value>UTF-8</param-value>
+        </init-param>
+    </filter>
+    <filter-mapping>
+        <filter-name>CharacterEncoding</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
+    <session-config>
+        <session-timeout>30</session-timeout>
+    </session-config>
+
+</web-app>

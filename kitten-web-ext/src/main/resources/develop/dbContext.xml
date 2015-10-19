@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:tx="http://www.springframework.org/schema/tx"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+       http://www.springframework.org/schema/beans/spring-beans-3.1.xsd
+       http://www.springframework.org/schema/tx
+       http://www.springframework.org/schema/tx/spring-tx-3.1.xsd">
+
+       <!--BI datasource,i.e. default datasource -->
+       <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+              <property name="driverClass" value="${core.jdbc.driverClassName}"/>
+              <property name="jdbcUrl" value="${core.jdbc.url}"/>
+              <property name="user" value="${core.jdbc.username}"/>
+              <property name="password" value="${core.jdbc.password}"/>
+              <property name="minPoolSize" value="${core.jdbc.minPoolSize}"/>
+              <property name="initialPoolSize" value="${core.jdbc.initialPoolSize}"/>
+              <property name="maxPoolSize" value="${core.jdbc.maxPoolSize}"/>
+              <property name="maxStatements" value="${core.jdbc.maxStatements}"/>
+              <property name="maxIdleTime" value="${core.jdbc.maxIdleTime}"/>
+              <property name="checkoutTimeout" value="${core.jdbc.checkoutTimeout}"/>
+       </bean>
+
+       <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+              <property name="dataSource" ref="dataSource"/>
+       </bean>
+
+       <tx:annotation-driven transaction-manager="transactionManager"/>
+
+       <bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+              <property name="dataSource" ref="dataSource"/>
+       </bean>
+
+       <bean id="mapperScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+              <property name="basePackage" value="com.gys.kitten.core.*.dao"/>
+              <property name="sqlSessionFactoryBeanName" value="sqlSessionFactory"/>
+       </bean>
+
+       <!--datasource2 -->
+       <bean id="businessDataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource" destroy-method="close">
+              <property name="driverClass" value="${business.jdbc.driverClassName}"/>
+              <property name="jdbcUrl" value="${business.jdbc.url}"/>
+              <property name="user" value="${business.jdbc.username}"/>
+              <property name="password" value="${business.jdbc.password}"/>
+              <property name="minPoolSize" value="${business.jdbc.minPoolSize}"/>
+              <property name="initialPoolSize" value="${business.jdbc.initialPoolSize}"/>
+              <property name="maxPoolSize" value="${business.jdbc.maxPoolSize}"/>
+              <property name="maxStatements" value="${business.jdbc.maxStatements}"/>
+              <property name="maxIdleTime" value="${business.jdbc.maxIdleTime}"/>
+              <property name="checkoutTimeout" value="${business.jdbc.checkoutTimeout}"/>
+              <property name="idleConnectionTestPeriod" value="${business.jdbc.idleConnectionTestPeriod}"/>
+              <property name="testConnectionOnCheckin" value="${business.jdbc.testConnectionOnCheckin}"/>
+              <property name="preferredTestQuery" value="${business.jdbc.preferredTestQuery}"/>
+       </bean>
+
+       <bean id="businessTransactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+              <property name="dataSource" ref="businessDataSource"/>
+              <qualifier value="business"/>
+       </bean>
+
+       <tx:annotation-driven transaction-manager="businessTransactionManager"/>
+
+       <bean id="businessSqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+              <property name="dataSource" ref="businessDataSource"/>
+       </bean>
+
+       <bean id="businessMapperScanner" class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+              <property name="basePackage" value="com.gys.kitten.business.*.dao"/>
+              <property name="sqlSessionFactoryBeanName" value="businessSqlSessionFactory"/>
+       </bean>
+
+</beans>
