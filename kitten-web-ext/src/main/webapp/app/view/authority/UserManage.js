@@ -3,9 +3,9 @@
  */
 Ext.define('Admin.view.authority.UserManage', {
     extend: 'Ext.grid.Panel',
-    cls: 'user-grid',
     title: '用户管理',
-    margin: '20 0 0 20',
+    margin: '20 20 20 20',
+    cls: 'shadowborder',
     columns: [
         {
             xtype: 'gridcolumn',
