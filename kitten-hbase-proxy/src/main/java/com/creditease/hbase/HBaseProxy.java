@@ -148,7 +148,14 @@ public class HBaseProxy {
                 String tableName = String.valueOf(paramMap.get("tableName"));
                 byte[] startKey = getRowKey((ArrayList<Double>) paramMap.get("startKey"));
                 byte[] endKey = getRowKey((ArrayList<Double>) paramMap.get("endKey"));
-                returnMap.put("result", hBaseService.scan(tableName, startKey, endKey));
+                Integer pageNo = paramMap.containsKey("pageNo") ? ((Double) paramMap.get("pageNo")).intValue() : null;
+                Integer pageSize = paramMap.containsKey("pageSize") ? ((Double) paramMap.get("pageSize")).intValue() : null;
+                if (pageNo != null && pageSize != null) {
+                    Map<String, Object> pageMap = hBaseService.scan(tableName, startKey, endKey, pageNo, pageSize);
+                    returnMap.putAll(pageMap);
+                } else {
+                    returnMap.put("result", hBaseService.scan(tableName, startKey, endKey));
+                }
             } else if ("insert".equals(method)) {
                 String qualifiers = String.valueOf(paramMap.get("qualifiers"));
                 String values = String.valueOf(paramMap.get("values"));

@@ -6,6 +6,7 @@ import org.apache.hadoop.hbase.Cell;
 import org.apache.hadoop.hbase.HBaseConfiguration;
 import org.apache.hadoop.hbase.TableName;
 import org.apache.hadoop.hbase.client.*;
+import org.apache.hadoop.hbase.filter.PageFilter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
@@ -183,7 +184,7 @@ public class HBaseService {
     }
 
     /**
-     * 通过 rowKey 区间进行scan
+     * 通过 rowKey 区间进行scan,scan是前包含后不包含的
      *
      * @param tableName
      * @param startKey
@@ -199,18 +200,76 @@ public class HBaseService {
         scan.setStopRow(endKey);
         ResultScanner rs = table.getScanner(scan);
         for (Result r : rs) {
-            HashMap<String, Object> row = new HashMap();
-            String key = new String(r.getRow());
-            row.put("key", key);
-            for (Cell c : r.listCells()) {
-                String qualifier = new String(c.getQualifier());
-                String value = new String(c.getValue());
-                row.put(qualifier, value);
-            }
-            returnList.add(row);
+            returnList.add(getMapFromRow(r));
         }
         return returnList;
     }
 
 
+    /**
+     * 通过 rowKey 区间进行scan,scan是前包含后不包含的,同时提供分页功能
+     *
+     * @param tableName
+     * @param startKey
+     * @param endKey
+     * @return
+     * @throws IOException
+     */
+    public Map<String, Object> scan(String tableName, byte[] startKey, byte[] endKey, Integer pageNo, Integer pageSize) throws Exception {
+        Map<String, Object> pageMap = new HashMap();
+        List<HashMap<String, Object>> returnList = new ArrayList<HashMap<String, Object>>();
+        PageScanManager pageScanManager = PageScanManager.getInstance();
+        PageScan pageScan = pageScanManager.getPageScan(new String(startKey), new String(endKey), pageSize);
+        startKey = pageScan.getPageStartKey(pageNo).getBytes();
+        HTable table = getTable(tableName);
+        Scan scan = new Scan();
+        scan.setStartRow(startKey);
+        scan.setStopRow(endKey);
+        //当缓存分页已经生成时,设置查询记录数
+        if (pageScan.getPageRowKey() != null) {
+            scan.setFilter(new PageFilter(pageSize));
+        }
+        ResultScanner rs = table.getScanner(scan);
+        //生成缓存分页 pageNo->startKey
+        if (pageScan.getPageRowKey() == null) {
+            int rowNum = 0;
+            for (Result r : rs) {
+                ++rowNum;
+                if (rowNum % pageSize == 1) {
+                    pageScan.setPageNoStartKey(rowNum / pageSize + 1, new String(r.getRow()));
+                }
+                if ((rowNum / pageSize + 1) == pageNo || (rowNum % pageSize == 0 && rowNum / pageSize == pageNo)) {
+                    returnList.add(getMapFromRow(r));
+                }
+            }
+            pageScan.setTotal(rowNum);
+        } else {
+            for (Result r : rs) {
+                returnList.add(getMapFromRow(r));
+            }
+        }
+        pageMap.put("result", returnList);
+        pageMap.put("pageSize", pageSize);
+        pageMap.put("pageNo", pageNo);
+        pageMap.put("total", pageScan.getTotal());
+        return pageMap;
+    }
+
+    /**
+     * 将Hbase result转化为Map
+     *
+     * @param result
+     * @return
+     */
+    private HashMap<String, Object> getMapFromRow(Result result) {
+        HashMap<String, Object> row = new HashMap();
+        String key = new String(result.getRow());
+        row.put("key", key);
+        for (Cell c : result.listCells()) {
+            String qualifier = new String(c.getQualifier());
+            String value = new String(c.getValue());
+            row.put(qualifier, value);
+        }
+        return row;
+    }
 }
